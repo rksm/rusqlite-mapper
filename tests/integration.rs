@@ -1,29 +1,32 @@
 use rusqlite::{params, Connection};
 use rusqlite_mapper::FromRow;
+use rusqlite_mapper::Sqlite;
 use rusqlite_mapper::ToRow;
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Sqlite)]
 #[allow(dead_code)]
+#[sqlite(skip_to_row)]
 pub struct Todo {
     id: i32,
     text: String,
-    #[from_row(flatten, prefix = "author_")]
+    #[sqlite(flatten, prefix = "author_")]
     author: User,
-    #[from_row(flatten, prefix = "editor_")]
+    #[sqlite(flatten, prefix = "editor_")]
     editor: User,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Sqlite)]
 #[allow(dead_code)]
+#[sqlite(skip_to_row)]
 pub struct User {
     id: i32,
     name: String,
-    #[from_row(flatten, prefix = "role_")]
+    #[sqlite(flatten, prefix = "role_")]
     role: Option<Role>,
 }
 
 #[allow(dead_code)]
-#[derive(Debug, FromRow)]
+#[derive(Debug, Sqlite)]
 pub struct Role {
     id: i32,
     kind: String,
@@ -116,9 +119,9 @@ fn from_row() {
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#[derive(Debug, FromRow, ToRow)]
+#[derive(Debug, Sqlite)]
 struct Person {
-    #[to_row(primary_key)]
+    #[sqlite(primary_key)]
     id: i32,
     name: String,
     data: Option<Vec<u8>>,

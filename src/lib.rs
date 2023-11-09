@@ -5,4 +5,5 @@ mod from_row;
 mod to_row;
 
 pub use from_row::FromRow;
+pub use rusqlite_mapper_derive::Sqlite;
 pub use to_row::{SqliteTypeInfo, ToRow};

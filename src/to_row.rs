@@ -1,6 +1,3 @@
-pub use rusqlite;
-pub use rusqlite_mapper_derive::ToRow;
-
 /// A trait that maps a struct to a row in a database.
 pub trait ToRow: Sized {
     type Params<'a>: rusqlite::Params

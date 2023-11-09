@@ -1,37 +1,12 @@
-use darling::{ast::Data, Error, FromDeriveInput, FromField, ToTokens};
-use proc_macro::TokenStream;
+use darling::ToTokens;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::{DeriveInput, Result};
+use syn::Result;
 
-/// Fallible entry point for generating a `ToRow` implementation
-pub(crate) fn try_derive_to_row(input: &DeriveInput) -> std::result::Result<TokenStream, Error> {
-    let to_row_derive = DeriveToRow::from_derive_input(input)?;
-    Ok(to_row_derive.generate()?)
-}
+use crate::{derive_sqlite::DeriveSqlite, fields::SqliteField};
 
-/// Main struct for deriving `ToRow` for a struct.
-#[derive(Debug, FromDeriveInput)]
-#[darling(
-    attributes(to_row),
-    forward_attrs(allow, doc, cfg),
-    supports(struct_named)
-)]
-struct DeriveToRow {
-    ident: syn::Ident,
-    generics: syn::Generics,
-    data: Data<(), ToRowField>,
-}
-impl DeriveToRow {
-    /// Provides a slice of this struct's fields.
-    fn fields(&self) -> &[ToRowField] {
-        match &self.data {
-            Data::Struct(fields) => &fields.fields,
-            _ => panic!("invalid shape"),
-        }
-    }
-
-    fn generate(self) -> Result<TokenStream> {
+impl DeriveSqlite {
+    pub(crate) fn generate_to_row(&self) -> Result<TokenStream2> {
         let ident = &self.ident;
 
         let (impl_generics, ty_generics, _where_clause) = self.generics.split_for_impl();
@@ -103,31 +78,17 @@ impl DeriveToRow {
                     ]
                 }
             }
-        }
-        .into())
+        })
     }
 }
 
-/// A single field inside of a struct that derives `ToRow`
-#[derive(Debug, FromField)]
-#[darling(attributes(to_row), forward_attrs(allow, doc, cfg))]
-struct ToRowField {
-    /// The identifier of this field.
-    ident: Option<syn::Ident>,
-    /// The type specified in this field.
-    ty: syn::Type,
-    /// Override the name of the actual sql column instead of using `self.ident`.
-    /// Is not compatible with `flatten` since no column is needed there.
-    rename: Option<String>,
-
-    primary_key: Option<()>,
-}
-
-impl ToRowField {
+impl SqliteField {
+    /// The Rust type of when this field is converted to a param
     fn param_ty(&self) -> Result<TokenStream2> {
         type_to_param_ty(&self.ty)
     }
 
+    /// The Rust expression to access this field as a param
     fn param_ref(&self) -> Result<TokenStream2> {
         let Some(ident) = &self.ident else {
             return Ok(quote! {
@@ -163,32 +124,10 @@ impl ToRowField {
             {
                 quote! { self.#ident }
             }
-            // Some(id) if id == "String" => quote! { &self.#ident },
-            // Some(id) if id == "Option" => quote! { &self.#ident },
             _ => quote! { &self.#ident },
         };
 
         Ok(res)
-    }
-
-    // fn column_type(&self) -> String {
-    //     self.rename
-    //         .as_ref()
-    //         .map(Clone::clone)
-    //         .unwrap_or_else(|| self.ident.as_ref().unwrap().to_string())
-    // }
-
-    /// Returns the name that maps to the actuall sql column
-    /// By default this is the same as the rust field name but can be overwritten by `#[from_row(rename = "..")]`.
-    fn column_name(&self) -> String {
-        self.rename
-            .as_ref()
-            .map(Clone::clone)
-            .unwrap_or_else(|| self.ident.as_ref().unwrap().to_string())
-    }
-
-    fn is_primary_key(&self) -> bool {
-        self.primary_key.is_some()
     }
 }
 
