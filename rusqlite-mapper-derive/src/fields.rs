@@ -30,6 +30,9 @@ pub(crate) struct SqliteField {
 
     /// Indicates that this field is the primary key of the table.
     pub(crate) primary_key: Option<()>,
+
+    /// Ignore this field for any Sql related operations.
+    pub(crate) skip: Option<()>,
 }
 
 impl SqliteField {

@@ -21,7 +21,7 @@ impl DeriveSqlite {
             .collect::<syn::Result<Vec<_>>>()?;
 
         let try_from_row_fields = self
-            .fields()
+            .all_fields()
             .iter()
             .map(|f| f.generate_try_from_row())
             .collect::<syn::Result<Vec<_>>>()?;
@@ -77,6 +77,11 @@ impl SqliteField {
     /// Generate the line needed to retrieve this field from a row when calling `try_from_row`.
     fn generate_try_from_row(&self) -> Result<TokenStream2> {
         let ident = self.ident.as_ref().unwrap();
+
+        if self.skip.is_some() {
+            return Ok(quote!(#ident: Default::default()));
+        }
+
         let column_name = self.column_name();
         let field_ty = &self.ty;
         let target_ty = self.target_ty()?;

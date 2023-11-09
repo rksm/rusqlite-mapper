@@ -123,6 +123,9 @@ struct Person {
     id: i32,
     name: String,
     role: PersonRole,
+    #[allow(dead_code)]
+    #[sqlite(skip)]
+    ignore: IgnoreMe,
     data: Option<Vec<u8>>,
 }
 
@@ -132,6 +135,9 @@ enum PersonRole {
     Admin,
     User,
 }
+
+#[derive(Debug, Default)]
+struct IgnoreMe;
 
 impl std::str::FromStr for PersonRole {
     type Err = std::io::Error;
@@ -164,6 +170,7 @@ fn to_row() {
     let me = Person {
         id: 0,
         role: PersonRole::Admin,
+        ignore: IgnoreMe,
         name: "Steven".to_string(),
         data: None,
     };

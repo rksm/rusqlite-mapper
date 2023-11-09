@@ -50,7 +50,18 @@ impl DeriveSqlite {
     }
 
     /// Provides a slice of this struct's fields.
-    pub(crate) fn fields(&self) -> &[SqliteField] {
+    pub(crate) fn fields(&self) -> Vec<&SqliteField> {
+        match &self.data {
+            Data::Struct(fields) => fields
+                .fields
+                .iter()
+                .filter(|f| f.skip.is_none())
+                .collect::<Vec<_>>(),
+            _ => panic!("invalid shape"),
+        }
+    }
+
+    pub(crate) fn all_fields(&self) -> &[SqliteField] {
         match &self.data {
             Data::Struct(fields) => &fields.fields,
             _ => panic!("invalid shape"),
