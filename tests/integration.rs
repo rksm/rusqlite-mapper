@@ -1,6 +1,6 @@
 use rusqlite::{params, Connection};
-use rusqlite_from_row::FromRow;
-use rusqlite_from_row::ToRow;
+use rusqlite_mapper::FromRow;
+use rusqlite_mapper::ToRow;
 
 #[derive(Debug, FromRow)]
 #[allow(dead_code)]
@@ -22,6 +22,7 @@ pub struct User {
     role: Option<Role>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, FromRow)]
 pub struct Role {
     id: i32,

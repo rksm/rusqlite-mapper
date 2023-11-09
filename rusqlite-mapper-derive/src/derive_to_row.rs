@@ -66,15 +66,15 @@ impl DeriveToRow {
                 let ty = &field.ty;
                 let primary_key = field.is_primary_key();
                 quote! { (
-                    <#ty as rusqlite_from_row::SqliteTypeInfo>::sqlite_type().to_string(),
-                    <#ty as rusqlite_from_row::SqliteTypeInfo>::optional(),
+                    <#ty as rusqlite_mapper::SqliteTypeInfo>::sqlite_type().to_string(),
+                    <#ty as rusqlite_mapper::SqliteTypeInfo>::optional(),
                     #primary_key,
                 ) }
             })
             .collect::<Vec<_>>();
 
         Ok(quote! {
-            impl #impl_generics rusqlite_from_row::ToRow for #ident #ty_generics {
+            impl #impl_generics rusqlite_mapper::ToRow for #ident #ty_generics {
                 type Params<'a> = (#(#params),*)
                 where
                     Self: 'a;
@@ -220,21 +220,6 @@ fn type_to_param_ty(ty: &syn::Type) -> Result<TokenStream2> {
                 quote! { #ident }
             }
 
-            // segments if segments.last().map_or(false, |s| s.ident == "Option") => {
-            //     let segment = segments.last().unwrap();
-            //     let ty = match &segment.arguments {
-            //         syn::PathArguments::AngleBracketed(args) => {
-            //             let ty = args.args.first().unwrap();
-            //             match ty {
-            //                 syn::GenericArgument::Type(ty) => ty,
-            //                 _ => panic!("invalid shape"),
-            //             }
-            //         }
-            //         _ => panic!("invalid shape"),
-            //     };
-            //     let ty = type_to_param_ty(ty)?;
-            //     quote! { Option<#ty> }
-            // }
             segments if segments.last().map_or(false, |s| s.ident == "Vec") => {
                 let segment = segments.last().unwrap();
                 let ty = match &segment.arguments {

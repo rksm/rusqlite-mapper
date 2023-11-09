@@ -1,5 +1,5 @@
 pub use rusqlite;
-pub use rusqlite_from_row_derive::ToRow;
+pub use rusqlite_mapper_derive::ToRow;
 
 /// A trait that maps a struct to a row in a database.
 pub trait ToRow: Sized {
@@ -56,6 +56,26 @@ pub trait ToRow: Sized {
                 .join(", "),
         );
         stmt.push(')');
+        stmt
+    }
+
+    fn upsert_stmt(id: &str) -> String {
+        let mut stmt = Self::insert_stmt();
+        stmt.push_str(" ON CONFLICT (");
+        stmt.push_str(id);
+        stmt.push_str(") DO UPDATE SET ");
+        stmt.push_str(
+            &Self::column_names()
+                .iter()
+                .map(|name| {
+                    let mut stmt = String::from(*name);
+                    stmt.push_str(" = excluded.");
+                    stmt.push_str(name);
+                    stmt
+                })
+                .collect::<Vec<_>>()
+                .join(", "),
+        );
         stmt
     }
 }

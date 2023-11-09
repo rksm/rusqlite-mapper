@@ -1,4 +1,4 @@
-pub use rusqlite_from_row_derive::FromRow;
+pub use rusqlite_mapper_derive::FromRow;
 
 /// A trait that allows mapping a [`rusqlite::Row`] to other types.
 pub trait FromRow: Sized {

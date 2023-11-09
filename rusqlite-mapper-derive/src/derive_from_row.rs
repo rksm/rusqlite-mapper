@@ -75,7 +75,7 @@ impl DeriveFromRow {
             .collect::<syn::Result<Vec<_>>>()?;
 
         Ok(quote! {
-            impl #impl_generics rusqlite_from_row::FromRow for #ident #ty_generics where #(#original_predicates),* #(#predicates),* {
+            impl #impl_generics rusqlite_mapper::FromRow for #ident #ty_generics where #(#original_predicates),* #(#predicates),* {
                 fn try_from_row_prefixed(
                     row: &::rusqlite::Row,
                     prefix: Option<&str>
@@ -167,7 +167,7 @@ impl FromRowField {
     /// Pushes the needed where clause predicates for this field.
     ///
     /// By default this is `T: rusqlite::types::FromSql`,
-    /// when using `flatten` it's: `T: rusqlite_from_row::FromRow`
+    /// when using `flatten` it's: `T: rusqlite_mapper::FromRow`
     /// and when using either `from` or `try_from` attributes it additionally pushes this bound:
     /// `T: std::convert::From<R>`, where `T` is the type specified in the struct and `R` is the
     /// type specified in the `[try]_from` attribute.
@@ -176,7 +176,7 @@ impl FromRowField {
         let ty = &self.ty;
 
         predicates.push(if self.flatten {
-            quote! (#target_ty: rusqlite_from_row::FromRow)
+            quote! (#target_ty: rusqlite_mapper::FromRow)
         } else {
             quote! (#target_ty: ::rusqlite::types::FromSql)
         });
@@ -206,7 +206,7 @@ impl FromRowField {
                 quote!(prefix)
             };
 
-            quote!(<#target_ty as rusqlite_from_row::FromRow>::is_all_null(row, #prefix)?)
+            quote!(<#target_ty as rusqlite_mapper::FromRow>::is_all_null(row, #prefix)?)
         } else {
             quote! {
                 ::rusqlite::Row::get_ref::<&str>(
@@ -233,7 +233,7 @@ impl FromRowField {
                 quote!(prefix)
             };
 
-            quote!(<#target_ty as rusqlite_from_row::FromRow>::try_from_row_prefixed(row, #prefix)?)
+            quote!(<#target_ty as rusqlite_mapper::FromRow>::try_from_row_prefixed(row, #prefix)?)
         } else {
             quote!(::rusqlite::Row::get::<&str, #target_ty>(row, &(prefix.unwrap_or("").to_string() + #column_name))?)
         };
