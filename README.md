@@ -1,20 +1,20 @@
-# rusqlite-from-row
+# rusqlite-mapper
 
-Derive `FromRow` to generate a mapping between a struct and rusqlite rows.
+Derive `Sqlite` to generate a mapping between a struct and rusqlite rows.
 
 ```toml
 [dependencies]
-rusqlite_from_row = "0.2.0"
+rusqlite-mapper = "0.1.0"
 ```
 
 ## Usage
 
-Derive `FromRow` and execute a query that selects columns with the same names and types.
+Derive `Sqlite` and execute a query that selects columns with the same names and types.
 
 ```rust
-use rusqlite_from_row::FromRow;
+use rusqlite_mapper::Sqlite;
 
-#[derive(FromRow)]
+#[derive(Sqlite)]
 struct Todo {
     todo_id: i32,
     text: String,
@@ -34,18 +34,18 @@ Because tables might have naming collisions when joining them, you can specify a
 Outer joins can be supported by wrapping the flattened type in an `Option`. The `FromRow` implementation of `Option` will still require all columns to present, but will produce a `None` if all the columns are an SQL `null` value.
 
 ```rust
-use rusqlite_from_row::FromRow;
+use rusqlite_mapper::Sqlite;
 
-#[derive(FromRow)]
+#[derive(Sqlite)]
 struct Todo {
     id: i32,
     name: String,
     text: String,
-    #[from_row(flatten, prefix = "user_")]
+    #[sqlite(flatten, prefix = "user_")]
     author: User
 }
 
-#[derive(FromRow)]
+#[derive(Sqlite)]
 struct User {
     id: i32,
     name: String
