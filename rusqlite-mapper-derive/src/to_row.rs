@@ -1,4 +1,5 @@
 use darling::ToTokens;
+use heck::ToSnakeCase;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::Result;
@@ -32,7 +33,7 @@ impl DeriveSqlite {
             .map(|field| field.column_name())
             .collect::<Vec<_>>();
 
-        let table_name = self.ident.to_string();
+        let table_name = self.ident.to_string().to_snake_case();
 
         let sql_types = self
             .fields()
