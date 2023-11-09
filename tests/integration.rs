@@ -1,7 +1,5 @@
 use rusqlite::{params, Connection};
-use rusqlite_mapper::FromRow;
-use rusqlite_mapper::Sqlite;
-use rusqlite_mapper::ToRow;
+use rusqlite_mapper::{FromRow, Sqlite, SqliteValue, ToRow};
 
 #[derive(Debug, Sqlite)]
 #[allow(dead_code)]
@@ -124,7 +122,36 @@ struct Person {
     #[sqlite(primary_key)]
     id: i32,
     name: String,
+    role: PersonRole,
     data: Option<Vec<u8>>,
+}
+
+#[derive(Debug, SqliteValue)]
+#[sqlite(as_string)]
+enum PersonRole {
+    Admin,
+    User,
+}
+
+impl std::str::FromStr for PersonRole {
+    type Err = std::io::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "admin" => Ok(PersonRole::Admin),
+            "user" => Ok(PersonRole::User),
+            _ => todo!(),
+        }
+    }
+}
+
+impl std::fmt::Display for PersonRole {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PersonRole::Admin => write!(f, "admin"),
+            PersonRole::User => write!(f, "user"),
+        }
+    }
 }
 
 #[test]
@@ -136,6 +163,7 @@ fn to_row() {
 
     let me = Person {
         id: 0,
+        role: PersonRole::Admin,
         name: "Steven".to_string(),
         data: None,
     };
