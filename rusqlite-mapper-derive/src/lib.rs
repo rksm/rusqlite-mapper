@@ -24,7 +24,7 @@ pub fn derive_to_row(input: TokenStream) -> TokenStream {
     }
 }
 
-#[proc_macro_derive(SqliteValue, attributes(sqlite))]
+#[proc_macro_derive(SqliteValue, attributes(rusqlite))]
 pub fn derive_sqlite_value(input: TokenStream) -> TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
     match derive_sqlite_value::try_derive_sqlite_value(&derive_input) {

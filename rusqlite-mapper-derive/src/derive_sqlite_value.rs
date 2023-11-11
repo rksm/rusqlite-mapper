@@ -15,7 +15,7 @@ pub(crate) fn try_derive_sqlite_value(
 /// implement `rusqlite::ToSql` and `rusqlite::types::FromSql` for the type as
 /// well as `rusqlite_mapper::SqliteTypeInfo`.
 #[derive(Debug, FromDeriveInput)]
-#[darling(attributes(sqlite), forward_attrs(allow, doc, cfg), supports(any))]
+#[darling(attributes(rusqlite), forward_attrs(allow, doc, cfg), supports(any))]
 pub(crate) struct DeriveSqliteValue {
     pub(crate) ident: syn::Ident,
 

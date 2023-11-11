@@ -128,7 +128,7 @@ struct Person {
 }
 
 #[derive(Debug, SqliteValue)]
-#[sqlite(as_string)]
+#[rusqlite(as_string)]
 enum PersonRole {
     Admin,
     User,
