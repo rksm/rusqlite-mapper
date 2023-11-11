@@ -33,6 +33,11 @@ pub(crate) struct SqliteField {
 
     /// Ignore this field for any Sql related operations.
     pub(crate) skip: Option<()>,
+
+    /// Normally, non atomic types are handed to rusqlite as references when
+    /// used as params. But some types like Uuid should be handed as values.
+    /// This attribute allows to specify that.
+    pub(crate) value: Option<()>,
 }
 
 impl SqliteField {

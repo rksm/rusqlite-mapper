@@ -86,7 +86,7 @@ impl DeriveSqlite {
 impl SqliteField {
     /// The Rust type of when this field is converted to a param
     fn param_ty(&self) -> Result<TokenStream2> {
-        type_to_param_ty(&self.ty)
+        type_to_param_ty(&self.ty, self.value.is_some())
     }
 
     /// The Rust expression to access this field as a param
@@ -96,6 +96,12 @@ impl SqliteField {
                 ()
             });
         };
+
+        if self.value.is_some() {
+            return Ok(quote! {
+                self.#ident
+            });
+        }
 
         let outer_type_ident = if let syn::Type::Path(syn::TypePath {
             path: syn::Path { segments, .. },
@@ -132,7 +138,11 @@ impl SqliteField {
     }
 }
 
-fn type_to_param_ty(ty: &syn::Type) -> Result<TokenStream2> {
+fn type_to_param_ty(ty: &syn::Type, force_as_value: bool) -> Result<TokenStream2> {
+    if force_as_value {
+        return Ok(quote! { #ty });
+    }
+
     let ty = match &ty {
         syn::Type::Path(syn::TypePath {
             path: syn::Path { segments, .. },
