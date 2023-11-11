@@ -15,17 +15,21 @@ pub(crate) fn try_derive_sqlite_value(
 /// implement `rusqlite::ToSql` and `rusqlite::types::FromSql` for the type as
 /// well as `rusqlite_mapper::SqliteTypeInfo`.
 #[derive(Debug, FromDeriveInput)]
-#[darling(attributes(rusqlite), forward_attrs(allow, doc, cfg), supports(any))]
+#[darling(
+    attributes(rusqlite_value),
+    forward_attrs(allow, doc, cfg),
+    supports(any)
+)]
 pub(crate) struct DeriveSqliteValue {
     pub(crate) ident: syn::Ident,
 
-    as_string: Option<()>,
-    as_json: Option<()>,
+    string: Option<()>,
+    json: Option<()>,
 }
 
 impl DeriveSqliteValue {
     fn generate(self) -> Result<TokenStream> {
-        match (self.as_string, self.as_json) {
+        match (self.string, self.json) {
             (Some(_), _) => self.generate_as_string(),
             (_, Some(_)) => self.generate_as_json(),
             _ => Err(Error::custom(
