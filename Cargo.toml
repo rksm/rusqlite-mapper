@@ -35,8 +35,12 @@ rusqlite-mapper-derive = { workspace = true }
 rusqlite = "0.29.0"
 serde_json = { version = "*", optional = true }
 chrono = { version = "*", default-features = false, optional = true }
+uuid = { version = "*", default-features = false, optional = true }
+url = { version = "*", default-features = false, optional = true }
 
 [features]
-default = ["chrono", "serde"]
+# default = ["chrono", "serde", "uuid", "url"]
 chrono = ["dep:chrono"]
 serde = ["dep:serde_json"]
+uuid = ["dep:uuid"]
+url = ["dep:url"]

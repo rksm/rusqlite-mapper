@@ -137,7 +137,12 @@ mod types_impl {
     #[cfg(feature = "chrono")]
     impl SqliteTypeInfo for chrono::DateTime<chrono::FixedOffset> { fn sqlite_type() -> &'static str { "TEXT" } }
 
-    // impl SqliteType for Url {}
+    #[cfg(feature = "url")]
+    impl SqliteTypeInfo for url::Url { fn sqlite_type() -> &'static str { "TEXT" } }
+
+    #[cfg(feature = "uuid")]
+    impl SqliteTypeInfo for uuid::Uuid { fn sqlite_type() -> &'static str { "TEXT" } }
+
     // impl SqliteType for ZeroBlob { fn sqlite_type() -> &'static str { "BLOB" } }
 
 }
