@@ -1,13 +1,46 @@
-use darling::ToTokens;
+use darling::{ast::Data, Error, FromDeriveInput};
 use heck::ToSnakeCase;
+use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
-use syn::Result;
+use quote::{quote, ToTokens};
+use syn::{DeriveInput, Result};
 
-use crate::{derive_sqlite::DeriveSqlite, fields::SqliteField};
+use crate::fields::SqliteField;
 
-impl DeriveSqlite {
-    pub(crate) fn generate_to_row(&self) -> Result<TokenStream2> {
+/// Fallible entry point for generating a `FromRow`, `ToRow` implementation
+pub(crate) fn try_derive(input: &DeriveInput) -> std::result::Result<TokenStream, Error> {
+    let derive = DeriveToRow::from_derive_input(input)?;
+    Ok(derive.generate()?)
+}
+
+/// Main struct for deriving `ToRow` for a struct.
+#[derive(Debug, FromDeriveInput)]
+#[darling(
+    attributes(rusqlite),
+    forward_attrs(allow, doc, cfg),
+    supports(struct_named)
+)]
+pub(crate) struct DeriveToRow {
+    pub(crate) ident: syn::Ident,
+    pub(crate) generics: syn::Generics,
+    pub(crate) data: Data<(), SqliteField>,
+}
+
+impl DeriveToRow {
+    /// Provides a slice of this struct's fields.
+    pub(crate) fn fields(&self) -> Vec<&SqliteField> {
+        match &self.data {
+            Data::Struct(fields) => fields
+                .fields
+                .iter()
+                .filter(|f| f.skip.is_none())
+                .collect::<Vec<_>>(),
+            _ => panic!("invalid shape"),
+        }
+    }
+
+    /// Generate the `FromRow` implementation.
+    fn generate(self) -> Result<TokenStream> {
         let ident = &self.ident;
 
         let (impl_generics, ty_generics, _where_clause) = self.generics.split_for_impl();
@@ -79,7 +112,8 @@ impl DeriveSqlite {
                     ]
                 }
             }
-        })
+        }
+        .into())
     }
 }
 
