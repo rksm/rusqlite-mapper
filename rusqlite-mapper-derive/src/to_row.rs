@@ -51,7 +51,7 @@ impl DeriveSqlite {
 
         Ok(quote! {
             impl #impl_generics rusqlite_mapper::ToRow for #ident #ty_generics {
-                type Params<'a> = (#(#params),*)
+                type Params<'a> = (#(#params),*,)
                 where
                     Self: 'a;
 
@@ -68,7 +68,7 @@ impl DeriveSqlite {
                 }
 
                 fn to_params(&self) -> Self::Params<'_> {
-                    (#(#param_values),*)
+                    (#(#param_values),*,)
                 }
 
                 fn sql_types() -> Vec<(String, bool, bool)> {
